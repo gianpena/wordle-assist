@@ -1,0 +1,1 @@
+Tool to help me solve wordle because some of these words are just silly
