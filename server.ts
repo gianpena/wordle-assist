@@ -9,7 +9,7 @@ const WORD_LIST_URL = 'https://gist.githubusercontent.com/dracos/dd0668f281e685b
 let words: string[] = [];
 
 const app = express();
-const port = 3000;
+const port = 80;
 
 async function loadWords() {
   const response = await fetch(WORD_LIST_URL);
