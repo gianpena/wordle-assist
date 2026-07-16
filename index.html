@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wordle Assist</title>
+  <style>
+    body {
+        font-family: 'Libre Franklin', sans-serif;
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    #word-area {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    #word-area > div {
+        display: flex;
+        gap: 4px;
+    }
+
+    .empty {
+        border: 2px dashed #ccc;
+    }
+
+    .gray {
+        background: #787c7e;
+        color: white;
+    }
+
+    .green {
+        background: #6aaa64;
+        color: white;
+    }
+
+    .yellow {
+        background: #c9b458;
+        color: white;
+    }
+
+    .empty, .gray, .green, .yellow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: bold;
+        box-sizing: border-box;
+        width: 48px;
+        height: 48px;
+    }
+
+    .submit {
+        background: #d3d6da;
+        border: none;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 24px;
+        font-weight: bold;
+        padding: 8px 24px;
+        cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+    <div id="word-area">
+        <div>
+            <div id="letter-0"></div>
+            <div id="letter-1"></div>
+            <div id="letter-2"></div>
+            <div id="letter-3"></div>
+            <div id="letter-4"></div>
+        </div>
+        <div>
+            <div id="letter-5"></div>
+            <div id="letter-6"></div>
+            <div id="letter-7"></div>
+            <div id="letter-8"></div>
+            <div id="letter-9"></div>
+        </div>
+        <div>
+            <div id="letter-10"></div>
+            <div id="letter-11"></div>
+            <div id="letter-12"></div>
+            <div id="letter-13"></div>
+            <div id="letter-14"></div>
+        </div>
+        <div>
+            <div id="letter-15"></div>
+            <div id="letter-16"></div>
+            <div id="letter-17"></div>
+            <div id="letter-18"></div>
+            <div id="letter-19"></div>
+        </div>
+        <div>
+            <div id="letter-20"></div>
+            <div id="letter-21"></div>
+            <div id="letter-22"></div>
+            <div id="letter-23"></div>
+            <div id="letter-24"></div>
+        </div>
+        <div>
+            <div id="letter-25"></div>
+            <div id="letter-26"></div>
+            <div id="letter-27"></div>
+            <div id="letter-28"></div>
+            <div id="letter-29"></div>
+        </div>
+
+        <script>
+            let colorMap = {
+                0: 'gray',
+                1: 'green',
+                2: 'yellow',
+                'gray': 0,
+                'green': 1,
+                'yellow': 2
+            };
+
+            for(let i=0;i<30;++i){
+                const letter = document.getElementById(`letter-${i}`);
+                const tile = document.createElement('div');
+                tile.className = 'empty';
+                letter.appendChild(tile);
+                
+                tile.addEventListener('click', event => {
+                    if(tile.className == 'empty') return;
+
+                    let nextColor = colorMap[(colorMap[tile.className] + 1) % 3];
+                    tile.className = nextColor;
+                });
+            }
+
+            const state = {
+                current_index: 0
+            };
+            
+            // normal letters
+            document.addEventListener('keydown', event => {
+                if(state.current_index >= 30) return;
+                if(event.key.length != 1) return;
+                const key = event.key.toUpperCase();
+                const isLetter = key >= 'A' && key <= 'Z';
+                if(!isLetter) return;
+
+                const letter = document.getElementById(`letter-${state.current_index}`).lastElementChild;
+                letter.textContent = key;
+                letter.className = 'gray';
+                state.current_index++;
+            });
+
+            // backspace
+            document.addEventListener('keydown', event => {
+                if(state.current_index <= 0) return;
+                const key = event.key;
+                if(key != 'Backspace') return;
+                state.current_index--;
+                const letter = document.getElementById(`letter-${state.current_index}`).lastElementChild;
+                letter.textContent = '';
+                letter.className = 'empty';
+            });
+        </script>
+    </div>
+
+    <button class="submit" id="submit-btn">
+        SUBMIT
+    </button>
+
+    <div id="remaining-words"></div>
+    
+    <script>
+        const btn = document.getElementById('submit-btn');
+        const remaining = document.getElementById('remaining-words');
+
+        btn.onclick = () => {
+            let i=0;
+            const wordleState = {}
+            for(; i < 30 && document.getElementById(`letter-${i}`).lastElementChild.className != 'empty'; ++i){
+                const letter = document.getElementById(`letter-${i}`).lastElementChild
+                wordleState[`letter-${i}`] = {
+                    value: letter.textContent,
+                    status: letter.className
+                };
+            }
+
+            if(i % 5 != 0) {
+                remaining.textContent = 'Please ensure each word is filled out completely.';
+                return;
+            }
+
+            fetch('http://localhost:3000/solve', {
+                method: 'POST',
+                body: JSON.stringify(wordleState),
+                headers: {'Content-Type': 'application/json'}
+            }).then(res => res.json())
+            .then(json => {
+                console.log('Words found:', json);
+                remaining.replaceChildren();
+                for(const word of json) {
+                    const wordElement = document.createElement('div');
+                    wordElement.textContent = word;
+                    remaining.appendChild(wordElement);
+                }
+            }).catch(e => {
+                remaining.textContent = `Something went wrong: ${e}`;
+            });
+
+        };
+    </script>
+    
+</body>
+</html>
