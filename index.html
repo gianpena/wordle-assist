@@ -181,7 +181,7 @@
         const btn = document.getElementById('submit-btn');
         const remaining = document.getElementById('remaining-words');
 
-        btn.onclick = () => {
+        function submitState() {
             let i=0;
             const wordleState = {}
             for(; i < 30 && document.getElementById(`letter-${i}`).lastElementChild.className != 'empty'; ++i){
@@ -214,7 +214,14 @@
                 remaining.textContent = `Something went wrong: ${e}`;
             });
 
-        };
+        }
+
+        btn.onclick = submitState;
+        document.addEventListener('keydown', () => {
+            if(event.key != 'Enter') return;
+
+            submitState();
+        });
     </script>
     
 </body>
