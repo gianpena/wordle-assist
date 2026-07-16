@@ -68,6 +68,7 @@
         font-weight: bold;
         padding: 8px 24px;
         cursor: pointer;
+        user-select: none;
     }
   </style>
 </head>
@@ -204,6 +205,11 @@
                 headers: {'Content-Type': 'application/json'}
             }).then(res => res.json())
             .then(json => {
+                if(json.length === 0) {
+                    remaining.textContent = 'No words found. You probably got here by entering an illegal wordle state. Please make sure your configuration makes sense before submitting!';
+                    return;
+                }
+
                 console.log('Words found:', json);
                 remaining.replaceChildren();
                 for(const word of json) {
