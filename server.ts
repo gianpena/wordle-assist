@@ -34,34 +34,56 @@ interface LetterStatus {
 type WordleState = Record<string, LetterStatus>;
 
 function filter(word: string,
-                gray: Set<string>,
-                yellow: Record<number, string>,
-                green: Record<number, string>): boolean {
-    
-    const remaining = { ...yellow };
+                gray: Record<number, string[]>,
+                yellow: Record<number, string[]>,
+                green: Record<number, string[]>): boolean {
 
-    for(let i: number = 0; i<5; ++i) {
-        if(gray.has(word[i])) return false;
-        if(i in green && green[i] != word[i]) return false;
-        if(i in yellow && yellow[i] == word[i]) return false;
-
-        for (const pos in remaining) {
-            if (remaining[pos] === word[i]) {
-                delete remaining[pos];
-                break;
+    for (const [posStr, letters] of Object.entries(green)) {
+        const pos = parseInt(posStr, 10);
+        for (const letter of letters) {
+            if (word[pos] !== letter) {
+                return false;
             }
         }
     }
 
-    return Object.keys(remaining).length === 0;
+    for (const [posStr, letters] of Object.entries(yellow)) {
+        const pos = parseInt(posStr, 10);
+        for (const letter of letters) {
+            if (!word.includes(letter) || word[pos] === letter) {
+                return false;
+            }
+        }
+    }
+
+    const requiredLetters = new Set<string>();
+    for (const letters of [...Object.values(green), ...Object.values(yellow)]) {
+        for (const letter of letters) {
+            requiredLetters.add(letter);
+        }
+    }
+
+    for (const [posStr, letters] of Object.entries(gray)) {
+        const pos = parseInt(posStr, 10);
+        for (const letter of letters) {
+            if (word[pos] === letter) {
+                return false;
+            }
+            if (!requiredLetters.has(letter) && word.includes(letter)) {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 app.post('/solve', (req, res) => {
     const state = req.body as WordleState;
     let i: number = 0;
-    const gray: Set<string> = new Set();
-    const yellow: Record<number, string> = {};
-    const green: Record<number, string> = {};
+    const gray: Record<number, string[]> = {};
+    const yellow: Record<number, string[]> = {};
+    const green: Record<number, string[]> = {};
 
 
     for(; `letter-${i}` in state; ++i) {
@@ -69,13 +91,16 @@ app.post('/solve', (req, res) => {
         const pos = i % 5;
         switch(status){
             case 'gray':
-                gray.add(value);
+                gray[pos] = gray[pos] ?? [];
+                gray[pos].push(value);
                 break;
             case 'green':
-                green[pos] = value;
+                green[pos] = green[pos] ?? [];
+                green[pos].push(value);
                 break;
             case 'yellow':
-                yellow[pos] = value;
+                yellow[pos] = yellow[pos] ?? [];
+                yellow[pos].push(value);
                 break;
         }
     }
