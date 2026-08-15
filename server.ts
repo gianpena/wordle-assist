@@ -1,7 +1,5 @@
 import express from 'express';
 import path from 'path';
-import fs from 'fs';
-import https from 'https';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -11,12 +9,7 @@ const WORD_LIST_URL = 'https://gist.githubusercontent.com/dracos/dd0668f281e685b
 let words: string[] = [];
 
 const app = express();
-const port = 443;
-
-const options = {
-    key: fs.readFileSync(path.join(__dirname, 'certs', 'localhost-key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, 'certs', 'localhost.pem')),
-};
+const port = 80;
 
 async function loadWords() {
   const response = await fetch(WORD_LIST_URL);
@@ -117,6 +110,6 @@ app.post('/solve', (req, res) => {
 
 });
 
-https.createServer(options, app).listen(port, () => {
-    console.log(`Listening on https://localhost:${port}!`);
+app.listen(port, () => {
+    console.log(`Listening on port ${port}!`);
 });
