@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const WORD_LIST_URL = 'https://gist.githubusercontent.com/cfreshman/a03ef2cba789d8cf00c08f767e0fad7b/raw/c46f451920d5cf6326d550fb2d6abb1642717852/wordle-answers-alphabetical.txt';
+const WORD_LIST_URL = 'https://raw.githubusercontent.com/tabatkins/wordle-list/main/words';
 let words: string[] = [];
 
 const app = express();
