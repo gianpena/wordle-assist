@@ -2,4 +2,4 @@ services:
   app:
     build: .
     ports:
-      - "80:80"
+      - "${HOST:-0.0.0.0}:${PORT:-80}:80"
