@@ -6,7 +6,7 @@ const text = await response.text();
 const words = text.trim().split('\n');    
 const WORD_LIST = words.map(word => word.toUpperCase());
 
-type LetterIndexMap = Record<string, number[]>;
+export type LetterIndexMap = Record<string, number[]>;
 const isValidCandidate = (word: string, gray: Set<string>, green: LetterIndexMap, yellow: LetterIndexMap): boolean => {
     // word is the string being checked for candidacy
     // gray, green and yellow are based only on information derived from a SINGLE guess
@@ -40,7 +40,7 @@ const isValidCandidate = (word: string, gray: Set<string>, green: LetterIndexMap
     return true;
 }
 
-export const candidates = (gray: Set<string>, green: LetterIndexMap, yellow: LetterIndexMap): Set<string> => {
+export const getCandidates = (gray: Set<string>, green: LetterIndexMap, yellow: LetterIndexMap): Set<string> => {
     return new Set<string>(
         WORD_LIST.filter(word => isValidCandidate(word, gray, green, yellow))
     );
