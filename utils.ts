@@ -7,7 +7,7 @@ const words = text.trim().split('\n');
 const WORD_LIST = words.map(word => word.toUpperCase());
 
 type LetterIndexMap = Record<string, number[]>;
-export const isValidCandidate = (word: string, gray: Set<string>, green: LetterIndexMap, yellow: LetterIndexMap): boolean => {
+const isValidCandidate = (word: string, gray: Set<string>, green: LetterIndexMap, yellow: LetterIndexMap): boolean => {
     // word is the string being checked for candidacy
     // gray, green and yellow are based only on information derived from a SINGLE guess
 
