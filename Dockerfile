@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
-COPY server.ts tsconfig.json index.html ./
+COPY server.ts utils.ts tsconfig.json index.html ./
 
 EXPOSE 80
 
